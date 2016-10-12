@@ -1,5 +1,6 @@
 package com.example.jchen.gridviewtest;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
@@ -17,14 +19,19 @@ public class DetailsActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private VideoView videoView;
-    private MediaController mediaControls;
+    //private MediaController mediaControls;
     private int position = 0;
+    ImageButton BtnShare;
+    private Bitmap bmp = null;
+    private String filename;
     //private MediaPlayer mMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        hideActionBar();
+
 
         /*
         ImageView imageView = (ImageView) findViewById(R.id.image);
@@ -35,7 +42,16 @@ public class DetailsActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.image_view);
         videoView = (VideoView) findViewById(R.id.video_view);
 
-        String filename = getIntent().getStringExtra("BitmapImageFile");
+        filename = getIntent().getStringExtra("BitmapImageFile");
+/*
+        File file = new File(filename);
+        Uri uri = Uri.parse(file.getAbsolutePath());
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("/*");
+        intent.setClassName("com.twitter.android", "com.twitter.android.PostActivity");
+        intent.putExtra(Intent.EXTRA_TEXT, "This is a share message");
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        startActivity(intent);*/
 
         if ( filename.contains(".mp4") ) {
             imageView.setVisibility(View.INVISIBLE);
@@ -65,11 +81,43 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Bitmap bmp = BitmapFactory.decodeFile(filename);
+            bmp = BitmapFactory.decodeFile(filename);
             videoView.setVisibility(View.INVISIBLE);
             imageView.setImageBitmap(bmp);
         }
 
+        BtnShare = (ImageButton) findViewById(R.id.share_button);
+        BtnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("video/*, image/*");
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + filename));
+                startActivity(Intent.createChooser(intent, "Share video"));
+
+                /*if ( filename.contains(".mp4") ) {
+                    intent.setType("video/*, image/*");
+                    intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + filename));
+                    startActivity(Intent.createChooser(intent, "Share video"));
+                } else {
+                    intent.setType("image/*");
+                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                    File f = new File(filename);
+                    try {
+                        f.createNewFile();
+                        FileOutputStream fo = new FileOutputStream(f);
+                        fo.write(bytes.toByteArray());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + filename));
+                    startActivity(Intent.createChooser(intent, "share image"));
+                }*/
+
+            }
+
+        });
         //try {
         //    FileInputStream is = openFileInput(filename);
         //    bmp = BitmapFactory.decodeStream(is);
@@ -137,4 +185,10 @@ public class DetailsActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    public void hideActionBar() {
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+    }
 }

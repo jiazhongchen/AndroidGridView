@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        hideActionBar();
+
         images = new ArrayList<String>();// list of file paths
         getFromSdcard();
 
@@ -43,12 +45,10 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
                 String item = images.get(position);
-                Toast.makeText(MainActivity.this, item, Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(MainActivity.this, item, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
                 intent.putExtra("BitmapImageFile", item);
                 startActivity(intent);
-
                 /*
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 Bitmap bmp = BitmapFactory.decodeFile(images.get(position), options);
@@ -221,6 +221,13 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < listFile.length; i++) {
                 images.add(listFile[i].getAbsolutePath());
             }
+        }
+    }
+
+    public void hideActionBar() {
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
         }
     }
 
