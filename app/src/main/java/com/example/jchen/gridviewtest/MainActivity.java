@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> images;
     File[] listFile;
 
+    private ImageAdapter imageAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,8 +40,10 @@ public class MainActivity extends AppCompatActivity {
         images = new ArrayList<String>();// list of file paths
         getFromSdcard();
 
+        imageAdapter = new ImageAdapter(this, images);
+
         GridView gridview = (GridView) findViewById(R.id.grid_view);
-        gridview.setAdapter(new ImageAdapter(this, images));
+        gridview.setAdapter(imageAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -87,6 +91,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Files", "FileName:" + file[i].getName());
         }
         */
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        imageAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -145,38 +155,9 @@ public class MainActivity extends AppCompatActivity {
     }*/
 
     public int makeFolder(String folderName) { // make a folder under Environment.DIRECTORY_DCIM
-        String state = Environment.getExternalStorageState();
-        if (!Environment.MEDIA_MOUNTED.equals(state)){
-            Log.d("MainActivity", "Error: external storage is unavailable");
-            return 0;
-        }
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.d("MainActivity", "Error: external storage is read only.");
-            return 0;
-        }
-        Log.d("MainActivity", "External storage is not read only or unavailable");
-
-        if (ContextCompat.checkSelfPermission(this, // request permission when it is not granted.
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d("MainActivity", "permission:WRITE_EXTERNAL_STORAGE: NOT granted!");
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this, new String[] {
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                }, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-        File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),folderName);
+        if (enableStorageAccess() == 0) return 0;
         int result = 0;
+        File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),folderName);
         if (folder.exists()) {
             Log.d("MainActivity","folder exist:"+folder.toString());
             result = 2; // folder exist
@@ -195,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -218,6 +200,13 @@ public class MainActivity extends AppCompatActivity {
         File file= new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "test");
         if (file.isDirectory()) {
             listFile = file.listFiles();
+            if (listFile == null) {
+                Log.i("GalleryActivity", "null list file here");
+                return;
+            } else {
+                Log.i("GalleryActivity", String.valueOf(listFile.length));
+            }
+
             for (int i = 0; i < listFile.length; i++) {
                 images.add(listFile[i].getAbsolutePath());
             }
@@ -229,6 +218,34 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
+    }
+
+    public int enableStorageAccess() {
+        String state = Environment.getExternalStorageState();
+        if (!Environment.MEDIA_MOUNTED.equals(state)){
+            return 0;
+        }
+        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return 0;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, new String[] {
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+        return 1;
     }
 
 }

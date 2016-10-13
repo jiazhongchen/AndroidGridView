@@ -13,7 +13,10 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
+import android.widget.Toast;
 import android.widget.VideoView;
+
+import java.io.File;
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -22,6 +25,7 @@ public class DetailsActivity extends AppCompatActivity {
     //private MediaController mediaControls;
     private int position = 0;
     ImageButton BtnShare;
+    ImageButton BtnDelete;
     private Bitmap bmp = null;
     private String filename;
     //private MediaPlayer mMediaPlayer;
@@ -118,13 +122,16 @@ public class DetailsActivity extends AppCompatActivity {
             }
 
         });
-        //try {
-        //    FileInputStream is = openFileInput(filename);
-        //    bmp = BitmapFactory.decodeStream(is);
-        //    is.close();
-        //} catch (Exception e) {
-        //    e.printStackTrace();
-        //}
+
+        BtnDelete = (ImageButton) findViewById(R.id.delete_button);
+        BtnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                File f = new File(filename);
+                f.delete();
+                Toast.makeText(DetailsActivity.this, filename + "deleted", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
